@@ -10,10 +10,11 @@ from aiogram.fsm.context import FSMContext
 from datetime import datetime
 import pytz
 from google import genai
+import os
 
-client = genai.Client(api_key="AIzaSyD85yOAeIbLIBpXg6tvxteQQc5i_8HTQ-4")
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
-BOT_TOKEN = "8633347484:AAEaPZNE4E5Dj5M-hucY7HrcvPaxWiIYsWg"
 
 bot = Bot(BOT_TOKEN)
 dp = Dispatcher()
