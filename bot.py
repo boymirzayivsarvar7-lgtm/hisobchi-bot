@@ -417,7 +417,14 @@ Qo‘shasizmi?
 """)
     else:
         await state.set_state(LimitState.amount)
-        await msg.answer("💰 Limit kiriting:")
+        await msg.answer(f"""
+🎯 Moliyaviy nazoratni boshlaymiz!
+
+💰 Kunlik xarajat limitingizni belgilang
+
+👇 Limitni kiriting:
+Masalan: 100000 so‘m
+""") 
 
 @router.message(LimitState.choose)
 async def choose(msg: Message, state: FSMContext):
