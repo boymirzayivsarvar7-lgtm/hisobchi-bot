@@ -658,10 +658,10 @@ async def ask_expense(msg: Message):
 💸 Summani va kategoriyani yozing
 
 📂 Mavjud toifalar:
-🍽 Ovqat | 🚕 Transport | 👕 Kiyim | 🎮 O‘yin
+🍔 Ovqat | 🚕 Transport | 🛍 Xarid | 📦 Boshqa
 
 ✍️ Masalan: 30000 ovqat
-""") 
+""")
 
 
 @router.message(lambda m: m.text and m.text.split()[0].isdigit())
