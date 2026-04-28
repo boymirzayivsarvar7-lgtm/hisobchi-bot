@@ -352,7 +352,7 @@ async def save_name(msg: Message, state: FSMContext):
     await set_name(msg.from_user.id, name)
 
     await msg.answer(f"""
-{name} 💎
+Assalomu alaykum, {name} 👋 
 
 💰 Tejamkor botga xush kelibsiz!
 
@@ -362,7 +362,7 @@ Men sizga:
 • Natijani tahlil qilishda yordam beraman  
 
 📊 Endi xarajatlaringizni nazorat qilishni boshlang
-"""), reply_markup=menu())
+""", reply_markup=menu()) 
     await state.clear()
 
 
