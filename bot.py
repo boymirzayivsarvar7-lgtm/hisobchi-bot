@@ -326,7 +326,7 @@ async def start(msg: Message, state: FSMContext):
 
     # ❗ agar ism yo‘q bo‘lsa
     if not name:
-        await msg.answer("Assalomu alaykum 👋\n\nIsmingiz nima?")
+        await msg.answer("Assalomu alaykum 👋\n\nIsmingiz kim?")
         await state.set_state(NameState.name)
         return
 
@@ -351,7 +351,13 @@ async def save_name(msg: Message, state: FSMContext):
 
     await set_name(msg.from_user.id, name)
 
-    await msg.answer(f"{name}, xush kelibsiz 💎", reply_markup=menu())
+    await msg.answer(f"{name}, xush kelibsiz 💎
+    Men sizga:
+• Xarajatlarni hisoblash  
+• Ularni tartibga solish  
+• Natijani tahlil qilishda yordam beraman  
+
+📊 Endi xarajatlaringizni nazorat qilishni boshlang", reply_markup=menu())
     await state.clear()
 
 
