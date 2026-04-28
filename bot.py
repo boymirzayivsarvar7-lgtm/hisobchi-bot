@@ -24,6 +24,15 @@ from datetime import datetime
 import pytz
 from google import genai
 import os
+texts = {
+    "welcome": {
+        "uz": "👋 Assalomu alaykum, {name}!\n\n💰 Tejamkor botga xush kelibsiz!",
+        "ru": "👋 Здравствуйте, {name}!\n\n💰 Добро пожаловать!",
+        "en": "👋 Hello, {name}!\n\n💰 Welcome to the bot!"
+    }
+}
+def t(key, lang, **kwargs):
+    return texts.get(key, {}).get(lang, "").format(**kwargs)
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
@@ -44,6 +53,7 @@ async def init_db():
         CREATE TABLE IF NOT EXISTS users (
             user_id INTEGER PRIMARY KEY,
             name TEXT,
+            lang TEXT DEFAULT 'uz',
             limit_amount INTEGER,
             created_date TEXT
         )
@@ -71,8 +81,8 @@ async def init_db():
 
         await db.commit()
 
-
 # USER
+
 async def add_user(uid):
     async with aiosqlite.connect(DB) as db:
         await db.execute(
@@ -80,6 +90,25 @@ async def add_user(uid):
             (uid,)
         )
         await db.commit()
+
+
+async def set_lang(user_id, lang):
+    async with aiosqlite.connect(DB) as db:
+        await db.execute(
+            "UPDATE users SET lang=? WHERE user_id=?",
+            (lang, user_id)
+        )
+        await db.commit()
+
+
+async def get_lang(user_id):
+    async with aiosqlite.connect(DB) as db:
+        async with db.execute(
+            "SELECT lang FROM users WHERE user_id=?",
+            (user_id,)
+        ) as cur:
+            row = await cur.fetchone()
+            return row[0] if row else "uz"
 
 
 # NAME
@@ -318,51 +347,70 @@ class NameState(StatesGroup):
 
 # ================= START =================
 
+class LangState(StatesGroup):
+    choose = State()
+
+
 @router.message(CommandStart())
 async def start(msg: Message, state: FSMContext):
     await add_user(msg.from_user.id)
 
-    name = await get_name(msg.from_user.id)
+    kb = ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="🇺🇿 O‘zbek")],
+            [KeyboardButton(text="🇷🇺 Русский")],
+            [KeyboardButton(text="🇬🇧 English")]
+        ],
+        resize_keyboard=True
+    )
 
-    # ❗ agar ism yo‘q bo‘lsa
-    if not name:
-        await msg.answer("Assalomu alaykum 👋\n\nIsmingiz kim?")
-        await state.set_state(NameState.name)
-        return
+    await msg.answer("🌐 Tilni tanlang:", reply_markup=kb)
+    await state.set_state(LangState.choose)
 
-    # ❗ ism bor bo‘lsa tasdiqlash
-    await msg.answer(f"{name}, sizmisiz?\n\n1️⃣ Ha\n2️⃣ Yo‘q")
-    await state.set_state(NameState.confirm)
+@router.message(LangState.choose)
+async def choose_lang(msg: Message, state: FSMContext):
+    text = msg.text
 
+    if "O‘zbek" in text:
+        lang = "uz"
+    elif "Русский" in text:
+        lang = "ru"
+    elif "English" in text:
+        lang = "en"
+    else:
+        return await msg.answer("Tilni tugmadan tanlang!")
 
+    await set_lang(msg.from_user.id, lang)
+
+    if lang == "uz":
+        await msg.answer("Ismingizni kiriting:")
+    elif lang == "ru":
+        await msg.answer("Введите ваше имя:")
+    else:
+        await msg.answer("Enter your name:")
+
+    await state.set_state(NameState.name)
 # ================= SAVE NAME =================
 
 @router.message(NameState.name)
 async def save_name(msg: Message, state: FSMContext):
-
     name = msg.text.strip()
 
-    # ❗ validatsiya
-    if not name:
-        return await msg.answer("❌ Ism yozing")
+    # 💾 ismni saqlash
+    async with aiosqlite.connect(DB) as db:
+        await db.execute(
+            "UPDATE users SET name=? WHERE user_id=?",
+            (name, msg.from_user.id)
+        )
+        await db.commit()
 
-    if len(name) > 20:
-        return await msg.answer("❌ Ism juda uzun (max 20 ta harf)")
+    # 🌐 user tilini olish
+    lang = await get_lang(msg.from_user.id)
 
-    await set_name(msg.from_user.id, name)
+    # 🎉 javob (tilga qarab)
+    text = t("welcome", lang, name=name) 
 
-    await msg.answer(f"""
-Assalomu alaykum, {name} 👋 
-
-💰 Tejamkor botga xush kelibsiz!
-
-Men sizga:
-• Xarajatlarni hisoblash  
-• Ularni tartibga solish  
-• Natijani tahlil qilishda yordam beraman  
-
-📊 Endi xarajatlaringizni nazorat qilishni boshlang
-""", reply_markup=menu()) 
+    await msg.answer(text, reply_markup=menu(lang)) 
     await state.clear()
 
 
