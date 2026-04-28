@@ -402,7 +402,14 @@ async def ask_limit(msg: Message, state: FSMContext):
     if limit:
         await state.set_state(LimitState.choose)
         await msg.answer(f"""
-💰 Bugungi limit: {limit:,}
+🎯 Moliyaviy nazoratni boshlaymiz!
+
+💰 O‘zingiz uchun kunlik limit belgilang
+
+👇 Limitni yozing:
+Masalan: 100000
+
+📊 Hozirgi limit: {limit:,} so‘m 
 
 Qo‘shasizmi?
 1️⃣ Ha
