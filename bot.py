@@ -652,7 +652,16 @@ async def goal_days(msg: Message, state: FSMContext):
 
 @router.message(F.text == "➕ Xarajat")
 async def ask_expense(msg: Message):
-    await msg.answer("✍️ 20000 ovqat")
+    await msg.answer("""
+➕ Yangi xarajat
+
+💸 Summani va kategoriyani yozing
+
+📂 Mavjud toifalar:
+🍽 Ovqat | 🚕 Transport | 👕 Kiyim | 🎮 O‘yin
+
+✍️ Masalan: 30000 ovqat
+""") 
 
 
 @router.message(lambda m: m.text and m.text.split()[0].isdigit())
