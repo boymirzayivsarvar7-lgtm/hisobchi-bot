@@ -483,19 +483,6 @@ async def report(msg: Message):
 
     await msg.answer(text)
 
-#    💎 SMART REPORT
-# ╚══════════════════╝
-
-# {bar(p)} {p}%
-
-# 💰 Limit: {limit:,}
-# 💸 Sarflandi: {total:,}
-# 📉 Qolgan: {qolgan:,}
-
-# {status(p)}
-# ━━━━━━━━━━━━━━━━━━
-# """)
-
 # ================= HISTORY =================
 
 @router.message(F.text == "📅 Tarix")
@@ -710,7 +697,7 @@ async def reminder_loop(bot: Bot):
         users = await get_all_users()
 
         # 🌅 TEST (ertalab eslatma)
-        if now.hour == 6 and now.minute in [0, 1]:
+        if now.hour == 6 and now.minute in [0]:
             for uid in users:
                 try:
                     limit = await get_limit_today(uid)
@@ -728,7 +715,7 @@ async def reminder_loop(bot: Bot):
             await asyncio.sleep(60)
 
         # 🌙 KUN YAKUNI (SMART)
-        if now.hour == 23 and now.minute in [0, 1]:
+        if now.hour == 23 and now.minute in [0]:
             for uid in users:
                 try:
                     limit = await get_limit_today(uid)
