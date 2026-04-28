@@ -351,13 +351,18 @@ async def save_name(msg: Message, state: FSMContext):
 
     await set_name(msg.from_user.id, name)
 
-    await msg.answer(f"{name}, xush kelibsiz 💎
-    Men sizga:
+    await msg.answer(f"""
+{name} 💎
+
+💰 Tejamkor botga xush kelibsiz!
+
+Men sizga:
 • Xarajatlarni hisoblash  
 • Ularni tartibga solish  
 • Natijani tahlil qilishda yordam beraman  
 
-📊 Endi xarajatlaringizni nazorat qilishni boshlang", reply_markup=menu())
+📊 Endi xarajatlaringizni nazorat qilishni boshlang
+"""), reply_markup=menu())
     await state.clear()
 
 
@@ -369,12 +374,25 @@ async def confirm_name(msg: Message, state: FSMContext):
     text = msg.text.strip()
 
     if text in ["1", "1️⃣ Ha", "Ha", "ha"]:
-        name = await get_name(msg.from_user.id)
-        await msg.answer(f"{name}, xush kelibsiz 💎", reply_markup=menu())
-        await state.clear()
+    name = await get_name(msg.from_user.id)
+
+    await msg.answer(f"""
+Assalomu alaykum, {name} 👋
+
+💰 Tejamkor botga xush kelibsiz!
+
+📌 Bu yerda siz:
+• Xarajatlaringizni yozasiz  
+• Ularni tartibga solasiz  
+• Natijani ko‘rib, nazorat qilasiz  
+
+📊 Boshlash uchun pastdagi menyudan foydalaning
+""", reply_markup=menu())
+
+    await state.clear()
 
     elif text in ["2", "2️⃣ Yo‘q", "Yo‘q", "yo‘q", "yo'q", "yoq"]:
-        await msg.answer("Ismingiz nima?")
+        await msg.answer("Ismingiz kim?")
         await state.set_state(NameState.name)
 
     else:
