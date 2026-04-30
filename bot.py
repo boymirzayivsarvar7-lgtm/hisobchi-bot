@@ -4,6 +4,7 @@ import os
 import pytz
 import logging
 import threading
+import re
 from datetime import datetime, timedelta
 from flask import Flask
 from google import genai
@@ -31,7 +32,6 @@ def run_web():
 threading.Thread(target=run_web, daemon=True).start()
 
 # ================= KONFIGURATSIYA =================
-
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 GEMINI_API_KEY = "AIzaSyCXhBTmzy2sICOqKR0KKdy20utprciWYXs"
 ADMIN_ID = 8088975078
@@ -400,14 +400,71 @@ async def daily_limit_reset():
 # --- 1. Kalit so'zlar orqali AI'siz tezkor tahlil (Tezlik uchun) ---
 def quick_classify(text: str):
     text = text.lower()
+
     keywords = {
-        "Ovqat": ["osh", "ovqat", "tushlik", "somsa", "shashlik", "non", "choy", "coffee", "suv", "burger", "lavash", "shirinlik", "manti"],
-        "Transport": ["taksi", "taxi", "yandex", "metro", "avtobus", "benzin", "gaz", "zapravka", "yo'kira", "poyezd", "metro"],
-        "Xarid": ["kiyim", "bozor", "shop", "market", "f-mart", "poyabzal", "shim", "ko'ylak", "texnika", "xo'jalik", "sovun", "shampun"],
+        "Ovqat": [
+            # 🇺🇿
+            "osh", "ovqat", "tushlik", "nonushta", "kechki ovqat",
+            "somsa", "shashlik", "lagmon", "manti", "palov",
+            "sho'rva", "kabob", "lavash", "burger", "hotdog",
+            "pizza", "choy", "qahva", "kofe", "suv", "cola",
+            "fanta", "pepsi", "ichimlik", "shirinlik", "tort",
+            "muzqaymoq", "shokolad", "chips", "fastfood",
+            "evos", "oqtepa", "kfc", "maxway",
+
+            # 🇷🇺
+            "еда", "обед", "ужин", "завтрак",
+            "плов", "шашлык", "суп", "манты",
+            "бургер", "пицца", "лаваш", "хотдог",
+            "чай", "кофе", "вода", "кола",
+            "сладости", "торт", "мороженое",
+            "шоколад", "чипсы", "фастфуд",
+            "поел", "покушал", "кушал",
+
+            # 🇬🇧
+            "food", "eat", "eating", "meal",
+            "breakfast", "lunch", "dinner",
+            "burger", "pizza", "hotdog",
+            "lavash", "shawarma", "kebab",
+            "coffee", "tea", "water", "cola",
+            "sweets", "cake", "ice cream",
+            "chocolate", "chips", "fast food"
+        ],
+
+        "Transport": [
+            # 🇺🇿
+            "taksi", "metro", "avtobus", "benzin", "gaz",
+            "zapravka", "poyezd", "yo'l kira",
+
+            # 🇷🇺
+            "такси", "метро", "автобус", "бензин",
+            "газ", "заправка", "поезд",
+
+            # 🇬🇧
+            "taxi", "bus", "metro", "fuel",
+            "petrol", "train"
+        ],
+
+        "Xarid": [
+            # 🇺🇿
+            "kiyim", "bozor", "market", "do'kon",
+            "poyabzal", "shim", "ko'ylak", "texnika",
+            "xo'jalik", "sovun", "shampun",
+
+            # 🇷🇺
+            "одежда", "покупка", "магазин",
+            "обувь", "техника", "шампунь",
+
+            # 🇬🇧
+            "shopping", "clothes", "store",
+            "shoes", "electronics", "buy"
+        ],
     }
+
     for category, words in keywords.items():
         if any(word in text for word in words):
             return category
+
     return None
 
 # --- 2. Gemini AI orqali noma'lum xarajatni aniqlash ---
@@ -446,65 +503,90 @@ def get_visual_report(total, limit):
         
     return status, f"{progress_bar} {percent}%", percent
 
-# --- 4. XARAJATLARNI QABUL QILISH (TUGMASIZ HAM ISHLAYDI) ---
-@router.message(lambda m: m.text and (m.text.split()[0].isdigit()))
+# --- 4. XARAJATLARNI QABUL QILISH ---
+@router.message(lambda m: m.text and m.text.strip().split()[0].isdigit())
 async def handle_expense_entry(msg: Message, state: FSMContext):
-    # Agar foydalanuvchi FSM holatida bo'lsa, xarajat qo'shmasdan qaytar
-    current_state = await state.get_state()
-    if current_state is not None:
+    if not msg.text:
+        return
+
+    parts = msg.text.strip().split()
+
+    # ❗ faqat raqamdan boshlansa ishlaydi
+    if not parts or not parts[0].isdigit():
+        return
+
+    user = await get_user_data(msg.from_user.id)
+    if not user:
         return
     
-    user = await get_user_data(msg.from_user.id)
-    if not user: return # Foydalanuvchi bazada bo'lmasa ishlamaydi
-    
     lang, current_limit = user[1], user[2]
-    parts = msg.text.split()
+
     amount = int(parts[0])
     comment = " ".join(parts[1:])
     
-    # Kategoriya aniqlash bosqichlari:
-    # 1. Kalit so'zlar orqali tekshirish
+    # 1. Keyword orqali
     category = quick_classify(comment)
-    
-    # 2. Agar topilmasa va izoh bo'lsa - AI ga yuborish
+
+    # 2. AI fallback
     if not category and comment:
-        category = await ai_classify(comment)
+        ai_result = await ai_classify(comment)
+
+        if ai_result in ["Ovqat", "Transport", "Xarid", "Boshqa"]:
+            category = ai_result
+        else:
+            category = "Boshqa"
+
     elif not comment:
-        category = "Boshqa" # Izoh yo'q bo'lsa avtomatik Boshqa
-    
+        category = "Boshqa"
+
     # Bazaga saqlash
     async with aiosqlite.connect(DB) as db:
-        await db.execute("INSERT INTO expenses (user_id, amount, category) VALUES (?, ?, ?)", 
-                         (msg.from_user.id, amount, category))
+        await db.execute(
+            "INSERT INTO expenses (user_id, amount, category) VALUES (?, ?, ?)", 
+            (msg.from_user.id, amount, category)
+        )
         await db.commit()
         
-        # Bugungi jami sarfni hisoblash
-        async with db.execute("SELECT SUM(amount) FROM expenses WHERE user_id=? AND date(created_at)=date('now')", 
-                              (msg.from_user.id,)) as cur:
+        async with db.execute(
+            "SELECT SUM(amount) FROM expenses WHERE user_id=? AND date(created_at)=date('now')", 
+            (msg.from_user.id,)
+        ) as cur:
             res = await cur.fetchone()
             total_today = res[0] or 0
 
-    # Vizual natijalarni olish
+    # Vizual
     status_text, p_bar, percent = get_visual_report(total_today, current_limit)
     
-    # Emojilar lug'ati
-    icons = {"Ovqat": "🍔", "Transport": "🚕", "Xarid": "🛒", "Boshqa": "📦"}
+    icons = {
+        "Ovqat": "🍔",
+        "Transport": "🚕",
+        "Xarid": "🛒",
+        "Boshqa": "📦"
+    }
     icon = icons.get(category, "📦")
-    
-    # Yakuniy chiroyli javob
+
+    translated_category = translate_category(category, lang)
+
     response = (
-        f"💸 {amount:,} — {icon} {category}\n\n"
+        f"💸 {amount:,} — {icon} {translated_category}\n\n"
         f"{status_text}\n\n"
         f"{p_bar}"
     )
-    
-    # 100% dan oshganda qo'shimcha ogohlantirish
-    if percent > 100:
-        over_text = {"uz": "💀 LIMITDAN OSHDINGIZ!", "ru": "💀 ВЫ ПРЕВЫСИЛИ ЛИМИТ!", "en": "💀 LIMIT EXCEEDED!"}
-        response = response.replace(status_text, over_text.get(lang, over_text["uz"]))
-        
-    await msg.answer(response)
 
+    # LIMIT OSHSA
+    if percent > 100:
+        over_text = {
+            "uz": "💀 LIMITDAN OSHDINGIZ!",
+            "ru": "💀 ВЫ ПРЕВЫСИЛИ ЛИМИТ!",
+            "en": "💀 LIMIT EXCEEDED!"
+        }
+
+        response = response.replace(
+            status_text,
+            over_text.get(lang, over_text["uz"])
+        )
+
+    await msg.answer(response)
 # --- Xarajat tugmasi bosilganda ko'rsatma berish ---
 @router.message(F.text.in_(["➕ Xarajat", "➕ Расход", "➕ Expense"]))
 async def expense_instruction(msg: Message):
@@ -583,18 +665,26 @@ async def goal_name_set(msg: Message, state: FSMContext):
 
 @router.message(GoalSet.money)
 async def goal_money_set(msg: Message, state: FSMContext):
-    if not msg.text.isdigit():
-        return await msg.answer("❌ Faqat raqam yozing!")
+    raw_text = re.sub(r"\D", "", msg.text or "")
+    if not raw_text:
+        return await msg.answer("❌ Faqat raqam yozing! Masalan: 100000")
+    amount = int(raw_text)
+    if amount <= 0:
+        return await msg.answer("❌ Summani 0 dan katta qilib kiriting.")
     data = await state.get_data()
     lang = data.get("lang", "uz")
-    await state.update_data(money=int(msg.text))
+    await state.update_data(money=amount)
     await msg.answer(t("goal_ask_days", lang))
     await state.set_state(GoalSet.days)
 
 @router.message(GoalSet.days)
 async def goal_days_finish(msg: Message, state: FSMContext):
-    if not msg.text.isdigit():
-        return await msg.answer("❌ Faqat raqam yozing!")
+    raw_text = re.sub(r"\D", "", msg.text or "")
+    if not raw_text:
+        return await msg.answer("❌ Faqat raqam yozing! Masalan: 30")
+    days = int(raw_text)
+    if days <= 0:
+        return await msg.answer("❌ Kunlar soni 0 dan katta bo'lishi kerak.")
     
     data = await state.get_data()
     if not data or 'title' not in data or 'money' not in data:
@@ -603,7 +693,6 @@ async def goal_days_finish(msg: Message, state: FSMContext):
     lang = data.get("lang", "uz")
     title = data['title']
     amount = data['money']
-    days = int(msg.text)
     
     per_day = amount // days if days > 0 else amount
     created_at = datetime.now().isoformat()
