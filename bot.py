@@ -814,9 +814,9 @@ async def history_main(msg: Message):
     # Shaffof tugmalar: Kechagi kun, 7 kun, 30 kun
     btns = t("btn_history", lang)
     kb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text=f"1️⃣ {btns[0]}", callback_data="hist_1")],
-        [InlineKeyboardButton(text=f"2️⃣ {btns[1]}", callback_data="hist_7")],
-        [InlineKeyboardButton(text=f"3️⃣ {btns[2]}", callback_data="hist_30")]
+        [InlineKeyboardButton(text=f" {btns[0]}", callback_data="hist_1")],
+        [InlineKeyboardButton(text=f" {btns[1]}", callback_data="hist_7")],
+        [InlineKeyboardButton(text=f" {btns[2]}", callback_data="hist_30")]
     ])
     
     await msg.answer(t("history_period", lang), reply_markup=kb)
