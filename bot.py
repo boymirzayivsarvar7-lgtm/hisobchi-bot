@@ -82,7 +82,7 @@ texts = {
         "btn_yes": "✅ Да",
         "btn_no": "❌ Нет",
         "btn_reset": "🔄 Обновить",
-        "limit_ask": "💰 Установите дневной лимит расходов:",
+        "limit_ask": "🎯 Начнем финансовый контроль!\n\n💰 Установите дневной лимит расходов\n\n👇 Введите сумму:\nНапример: 100000 сум",
         "limit_box": "╔════════════╗\n   ЛИМИТ НА СЕГОДНЯ 💸 \n ╚════════════╝\n\n💰 {amount}\n🔥 Контроль начат",
         "limit_exists": "📊 Текущий лимит: {limit} сум. Добавить еще?",
         "expense_ask": "➕ Новый расход\n\n💸 Введите сумму и категорию",
@@ -110,7 +110,8 @@ texts = {
         "btn_yes": "✅ Yes",
         "btn_no": "❌ No",
         "btn_reset": "🔄 Reset",
-        "limit_ask": "💰 Set your daily expense limit:",
+        "limit_ask"
+        "limit_ask": "🎯 Let’s start controlling your finances!\n\n💰 Set your daily expense limit\n\n👇 Enter the amount:\nExample: 100000 UZS",
         "limit_box": "╔════════════╗\n   TODAY'S LIMIT 💸 \n ╚════════════╝\n\n💰 {amount}\n🔥 Control started",
         "limit_exists": "📊 Current limit: {limit}. Add more?",
         "expense_ask": "➕ New expense\n\n💸 Enter amount and category",
