@@ -47,7 +47,7 @@ DB = "data.db"
 # Har bir til uchun alohida va to'liq javoblar
 texts = {
     "uz": {
-        "start_lang": "🌐 Iltimos o'zingizga qulay tilni tanlang:",
+        "start_lang": "╔══════════════════╗\n   🌍 TEJAMKOR BOT\n╚══════════════════╝\n\n🇺🇿 Assalomu alaykum!\n💸 Xarajatlaringizni nazorat qiling\n\n🇷🇺 Добро пожаловать!\n💸 Контролируйте свои расходы\n\n🇬🇧 Welcome!\n💸 Take control of your expenses\n\n━━━━━━━━━━━━━━━━━━\n\n👇 Tilni tanlang\n👇 Выберите язык\n👇 Choose language", ,
         "ask_name": "Iltimos ismingizni yozing 🙂\nMasalan: Sarvar",
         "confirm_user": "<b>{name}</b> sizmisiz? 👋",
         "welcome": "👋 Assalomu alaykum, {name}!\n\n💰 <b>Tejamkor</b> botga xush kelibsiz!\n📌 Bu yerda siz:\n• Xarajat yozasiz\n• Nazorat qilasiz\n• Analiz qilasiz\n\n👇 Menyudan foydalaning",
