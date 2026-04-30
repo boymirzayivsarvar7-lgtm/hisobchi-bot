@@ -109,8 +109,7 @@ texts = {
         "welcome": "👋 Hello, {name}!\n\n💰 Welcome to <b>Tejamkor</b> bot!\n📌 Here you can:\n• Track expenses\n• Control them\n• Analyze results",
         "btn_yes": "✅ Yes",
         "btn_no": "❌ No",
-        "btn_reset": "🔄 Reset",
-        "limit_ask"
+        "btn_reset": "🔄 Reset", 
         "limit_ask": "🎯 Let’s start controlling your finances!\n\n💰 Set your daily expense limit\n\n👇 Enter the amount:\nExample: 100000 UZS",
         "limit_box": "╔════════════╗\n   TODAY'S LIMIT 💸 \n ╚════════════╝\n\n💰 {amount}\n🔥 Control started",
         "limit_exists": "📊 Current limit: {limit}. Add more?",
