@@ -48,7 +48,7 @@ DB = "data.db"
 texts = {
     "uz": {
         "start_lang": "╔══════════════════╗\n   🌍 TEJAMKOR BOT\n╚══════════════════╝\n\n🇺🇿 Assalomu alaykum!\n💸 Xarajatlaringizni nazorat qiling\n\n🇷🇺 Добро пожаловать!\n💸 Контролируйте свои расходы\n\n🇬🇧 Welcome!\n💸 Take control of your expenses\n\n━━━━━━━━━━━━━━━━━━\n\n👇 Tilni tanlang\n👇 Выберите язык\n👇 Choose language",
-        "ask_name": "Iltimos ismingizni yozing 🙂\nMasalan: Sarvar",
+        "ask_name": "╔══════════════════╗\n   👤 PROFIL BOSHLASH\n╚══════════════════╝\n\n💸 Moliyaviy nazoratni boshlaymiz.\n\nIsmingizni kiriting:\nMasalan: Sarvar", 
         "confirm_user": "<b>{name}</b> sizmisiz? 👋",
         "welcome": "👋 Assalomu alaykum, {name}!\n\n💰 <b>Tejamkor</b> botga xush kelibsiz!\n📌 Bu yerda siz:\n• Xarajat yozasiz\n• Nazorat qilasiz\n• Analiz qilasiz\n\n👇 Menyudan foydalaning",
         "btn_yes": "✅ Ha",
@@ -76,7 +76,7 @@ texts = {
     },
     "ru": {
         "start_lang": "🌐 Пожалуйста, выберите удобный для вас язык:",
-        "ask_name": "Пожалуйста, введите ваше имя 🙂\nНапример: Иван",
+        "ask_name": "╔══════════════════╗\n   👤 НАСТРОЙКА ПРОФИЛЯ\n╚══════════════════╝\n\n💸 Начнем финансовый контроль.\n\nВведите ваше имя:\nНапример: Иван",
         "confirm_user": "Вы <b>{name}</b>? 👋",
         "welcome": "👋 Здравствуйте, {name}!\n\n💰 Добро пожаловать в <b>Tejamkor</b>!\n📌 Здесь вы:\n• Пишете расходы\n• Контролируете\n• Анализируете\n\n👇 Используйте меню",
         "btn_yes": "✅ Да",
@@ -104,7 +104,7 @@ texts = {
     },
     "en": {
         "start_lang": "🌐 Please choose a language that is convenient for you:",
-        "ask_name": "Please enter your name 🙂\nExample: John",
+        "ask_name": "╔══════════════════╗\n   👤 PROFILE SETUP\n╚══════════════════╝\n\n💸 Let’s start financial control.\n\nEnter your name:\nExample: John",
         "confirm_user": "Are you <b>{name}</b>? 👋",
         "welcome": "👋 Hello, {name}!\n\n💰 Welcome to <b>Tejamkor</b> bot!\n📌 Here you can:\n• Track expenses\n• Control them\n• Analyze results",
         "btn_yes": "✅ Yes",
