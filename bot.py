@@ -308,8 +308,10 @@ async def limit_main(msg: Message, state: FSMContext):
         kb = InlineKeyboardMarkup(inline_keyboard=[
             [
                 InlineKeyboardButton(text=t("btn_yes", lang), callback_data="lim_add"),
-                InlineKeyboardButton(text=t("btn_no", lang), callback_data="lim_cancel"),
-                InlineKeyboardButton(text=t("btn_reset", lang), callback_data="lim_reset")
+                InlineKeyboardButton(text=t("btn_no", lang), callback_data="lim_cancel"), 
+            ],
+            [  
+                 InlineKeyboardButton(text=t("btn_reset", lang), callback_data="lim_reset")
             ]
         ])
         await msg.answer(t("limit_exists", lang, limit=f"{current_limit:,}"), reply_markup=kb)
